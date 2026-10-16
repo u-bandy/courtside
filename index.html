@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Courtside Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1115;--s1:#171A20;--s2:#1F232B;--ln:#2A2F38;--ln2:#3A404B;--tx:#F4EFE6;--mu:#9AA1AB;--or:#F26A21;--or2:#FF8A4C;--ms:#E8E4DB;
+--disp:'Barlow Condensed','Oswald','Arial Narrow',Impact,sans-serif;--sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--sc:1}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#07080A;color:var(--tx);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
+input{font:inherit;color:inherit}
+.app{min-height:100%;display:flex;justify-content:center;align-items:flex-start;gap:36px;padding:24px}
+.flow{width:270px;flex:none;position:sticky;top:24px;max-height:calc(100vh - 48px);overflow:auto;scrollbar-width:thin}
+.flow h2{font-family:var(--disp);font-size:28px;letter-spacing:.02em;text-transform:uppercase;font-weight:800}
+.flow .sub{color:var(--mu);font-size:12px;margin:2px 0 12px;line-height:1.4}
+.fl-h{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#6b727d;margin:14px 10px 4px;font-weight:600}
+.fl-btn{display:flex;gap:10px;align-items:center;width:100%;padding:7px 10px;border-radius:10px;font-size:13px;color:#c9cdd3;min-height:34px}
+.fl-btn:hover{background:#171A20}
+.fl-btn.on{background:#1F232B;color:#fff}
+.fl-btn b{font-family:var(--disp);color:var(--or);width:20px;font-size:17px;font-weight:700}
+.fl-btn.restart{border:1.5px solid var(--ln2);justify-content:center;margin-top:10px;font-weight:600;color:var(--tx)}
+.alt{display:flex;gap:10px;align-items:center;width:100%;padding:7px 10px;border-radius:10px;font-size:13px;color:#c9cdd3;min-height:34px}
+.alt:hover{background:#171A20}
+.sw{width:34px;height:20px;border-radius:12px;background:#2A2F38;position:relative;flex:none;border:1px solid var(--ln2)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#9AA1AB;transition:.15s}
+.alt.on .sw{background:var(--or);border-color:var(--or)}
+.alt.on .sw::after{left:16px;background:#0F1115}
+.stagebox{flex:none;width:calc(390px*var(--sc));height:calc(844px*var(--sc));margin:11px}
+.phone{position:relative;width:390px;height:844px;border-radius:48px;overflow:hidden;background:var(--bg);transform:scale(var(--sc));transform-origin:0 0;box-shadow:0 0 0 10px #1a1c21,0 0 0 11px #2e323a,0 40px 90px rgba(0,0,0,.65);font-family:var(--sans)}
+.sb{position:absolute;top:0;left:0;right:0;height:44px;display:flex;justify-content:space-between;align-items:center;padding:8px 30px 0;font-size:15px;font-weight:600;z-index:30;pointer-events:none}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:112px;height:30px;border-radius:20px;background:#000;z-index:31}
+.prog{position:absolute;top:44px;left:0;right:0;height:32px;display:flex;gap:4px;padding:0 16px;z-index:12}
+.prog div{flex:1;font-size:10.5px;color:#6b727d;font-weight:600;white-space:nowrap;text-align:left}
+.prog div i{display:block;height:3px;border-radius:2px;background:var(--ln);margin-bottom:5px}
+.prog div.past i{background:rgba(242,106,33,.5)}
+.prog div.on i{background:var(--or)}
+.prog div.on{color:var(--tx)}
+.hdr{position:absolute;top:76px;left:0;right:0;height:50px;display:flex;align-items:center;gap:8px;padding:0 14px 0 8px;z-index:12}
+.ib{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none}
+.ib:active{background:var(--s2)}
+.ib.ph{visibility:hidden}
+.hdt{flex:1;min-width:0}
+.hdt b{display:block;font-family:var(--disp);font-size:20px;text-transform:uppercase;letter-spacing:.03em;line-height:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdt span{font-size:11px;color:var(--mu)}
+.dchip{display:flex;align-items:center;gap:6px;border:1.5px solid var(--ln2);border-radius:99px;padding:0 11px;height:36px;font-size:12px;font-weight:600;flex:none;background:var(--s1)}
+.dchip .dd{width:8px;height:8px;border-radius:50%;background:var(--or)}
+.dchip.off .dd{background:transparent;border:2px solid var(--mu)}
+.dchip.low{border-color:var(--ms)}
+.view{position:absolute;top:126px;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column}
+.view>.pg{flex:none}
+.view::-webkit-scrollbar{display:none}
+.view.hasnav{bottom:78px}
+.nav{position:absolute;left:0;right:0;bottom:0;height:78px;background:rgba(15,17,21,.97);border-top:1px solid var(--ln);display:flex;padding:6px 8px 0;z-index:20}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mu);height:52px;justify-content:center;border-radius:12px;font-weight:600}
+.nav button.on{color:var(--or)}
+.hi{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:#E8E4DB;opacity:.45;z-index:40;pointer-events:none}
+.pg{padding:6px 20px 8px}
+.cta{margin-top:auto;position:sticky;bottom:0;flex:none;padding:22px 20px 14px;background:linear-gradient(to top,var(--bg) 62%,rgba(15,17,21,0));z-index:5}
+.cta .lnk{display:block;text-align:center;margin-top:10px;font-size:14px;color:var(--mu);text-decoration:underline;padding:8px;font-weight:500}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;border-radius:16px;padding:0 20px;font-weight:700;font-size:16px;width:100%;text-align:center}
+.btn.pri{background:var(--or);color:#0F1115}
+.btn.pri:active{background:var(--or2)}
+.btn.gh{border:1.5px solid var(--ln2);color:var(--tx)}
+.btn.sm{min-height:42px;font-size:14px;border-radius:12px;padding:0 14px;width:auto}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.h1{font-family:var(--disp);font-size:38px;line-height:.98;text-transform:uppercase;font-weight:800;letter-spacing:.005em}
+.h2{font-family:var(--disp);font-size:24px;text-transform:uppercase;font-weight:700;letter-spacing:.02em;line-height:1}
+.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);font-weight:600}
+.mu{color:var(--mu)} .or{color:var(--or)} .sm{font-size:13px} .xs{font-size:12px}
+.big{font-family:var(--disp);font-weight:800;line-height:.88}
+.lead{color:var(--mu);font-size:15px;line-height:1.45;margin-top:8px}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:20px;padding:16px;margin-bottom:14px}
+.rowb{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row{display:flex;align-items:center;gap:12px}
+.gap8{margin-top:8px}.gap14{margin-top:14px}.gap20{margin-top:20px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:7px;border:1px solid var(--ln2);color:var(--mu);white-space:nowrap}
+.tag.or{border-color:var(--or);color:var(--or)}
+.tag.wh{border-color:var(--ms);color:var(--ms)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;border:1.5px solid var(--ln2);font-size:14px;font-weight:600;min-height:42px}
+.chip.on{border-color:var(--or);background:rgba(242,106,33,.14)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.seg{display:flex;background:var(--s2);border-radius:12px;padding:3px}
+.seg button{flex:1;padding:9px 6px;border-radius:9px;font-size:13px;font-weight:600;color:var(--mu);min-height:38px;text-align:center}
+.seg button.on{background:#0F1115;color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln2)}
+.opt{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border-radius:16px;border:1.5px solid var(--ln2);margin-top:10px;min-height:62px;background:var(--s1)}
+.opt.on{border-color:var(--or);background:rgba(242,106,33,.1)}
+.opt .t{font-weight:700;font-size:16px;display:block}
+.opt .s{font-size:13px;color:var(--mu);display:block;margin-top:2px}
+.opt .grow{flex:1}
+.radio{width:24px;height:24px;border-radius:50%;border:2px solid var(--ln2);display:flex;align-items:center;justify-content:center;flex:none}
+.opt.on .radio{background:var(--or);border-color:var(--or);color:#0F1115}
+.note{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;border:1px solid var(--ln2);background:var(--s1);font-size:13px;line-height:1.45;margin:0 0 12px}
+.note b{display:block;font-size:14px;margin-bottom:2px}
+.note svg{flex:none;margin-top:1px}
+.note.warn{border-color:var(--ms);background:rgba(232,228,219,.06)}
+.note.ok{border-color:rgba(242,106,33,.5);background:rgba(242,106,33,.08)}
+.av{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--s2);border:2px solid var(--ln2);font-family:var(--disp);font-weight:700;flex:none}
+.av.on{border-color:var(--or);background:rgba(242,106,33,.18)}
+.who{display:flex;gap:8px}
+.who button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;font-weight:600;flex:1;padding:8px 2px;border-radius:12px;min-height:64px;text-align:center}
+.who button.on{background:rgba(242,106,33,.1)}
+.illus{background:var(--s1);border:1px solid var(--ln);border-radius:22px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:16px}
+.cap{font-size:11px;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;font-weight:600}
+.steps li{list-style:none;display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.4;margin-top:10px}
+.steps li i{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--s2);border:1.5px solid var(--ln2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.chk{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--ln);font-size:15px}
+.chk:last-child{border:0}
+.chk .ci{width:26px;height:26px;border-radius:50%;border:2px solid var(--ln2);display:flex;align-items:center;justify-content:center;flex:none}
+.chk.done .ci{background:var(--or);border-color:var(--or);color:#0F1115}
+.chk.bad .ci{border-color:var(--ms);color:var(--ms)}
+.chk .r{margin-left:auto;font-size:13px;color:var(--mu);text-align:right}
+.timer{display:flex;align-items:center;justify-content:space-between;background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:10px 14px;margin-bottom:12px}
+.timer b{font-family:var(--disp);font-size:26px;font-weight:700;letter-spacing:.02em}
+.tbar{height:5px;border-radius:3px;background:var(--ln);overflow:hidden;margin-top:6px}
+.tbar i{display:block;height:100%;background:var(--or)}
+.sheetbg{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:50}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--s1);border-radius:26px 26px 0 0;padding:10px 20px 26px;z-index:51;border-top:1px solid var(--ln2);animation:up .22s ease-out;scrollbar-width:none}
+.sheet::-webkit-scrollbar{display:none}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--ln2);margin:0 auto 14px}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%) translateY(10px);background:var(--ms);color:#0F1115;padding:11px 16px;border-radius:14px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:60;white-space:nowrap;max-width:350px}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.court{width:100%;height:auto;display:block}
+.court text{pointer-events:none}
+.zp{font:800 17px var(--disp);fill:#F4EFE6;stroke:#0F1115;stroke-width:3px;paint-order:stroke}
+.zc{font:600 9px var(--sans);fill:#e1dcd2;stroke:#0F1115;stroke-width:2.5px;paint-order:stroke}
+.dot{cursor:pointer}
+.hero{display:flex;gap:0;margin-top:14px}
+.hero>div{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.pill.make{background:var(--or);color:#0F1115}
+.pill.miss{border:1.5px solid var(--ms);color:var(--ms)}
+.cov{margin-top:14px}
+.covb{position:relative;height:8px;background:var(--ln);border-radius:4px;overflow:hidden}
+.covb i{position:absolute;top:0;bottom:0;background:var(--or)}
+.covb i.gp{background:repeating-linear-gradient(45deg,#6B7280 0 3px,#2A2F38 3px 6px)}
+.clips{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;scrollbar-width:none}
+.clips::-webkit-scrollbar{display:none}
+.clipc{flex:none;width:158px}
+.thumb{position:relative;width:158px;height:104px;border-radius:14px;overflow:hidden;background:#1a1d23;border:1px solid var(--ln)}
+.thumb .pb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(15,17,21,.75);border:1.5px solid var(--ms);display:flex;align-items:center;justify-content:center}
+.thumb .tm{position:absolute;right:6px;bottom:6px;font-size:11px;font-weight:700;background:rgba(0,0,0,.7);padding:2px 6px;border-radius:6px}
+.thumb.dash{border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:var(--mu);font-size:12px;text-align:center}
+.flag{display:flex;gap:12px;align-items:center;width:100%;padding:12px;border:1.5px dashed var(--ln2);border-radius:16px;margin-bottom:10px;background:var(--s1)}
+.flag .fq{width:44px;height:44px;border-radius:12px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex:none;border:1px dashed var(--ms)}
+.stat3{display:flex;gap:10px}
+.stat3>div{flex:1;background:var(--s2);border-radius:14px;padding:12px}
+.soon{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ln);color:var(--mu);font-size:14px}
+.soon:last-child{border:0}
+.scene{border-radius:16px;overflow:hidden;border:1px solid var(--ln);background:#12151a}
+.scene svg{display:block;width:100%;height:auto}
+.live{white-space:nowrap;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 12px;border-radius:99px;border:1.5px solid var(--ln2)}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--or);animation:pulse 1.2s infinite}
+.live.warn i{background:transparent;border:2px solid var(--ms);animation:none}
+@keyframes pulse{50%{opacity:.25}}
+.ring{transform:rotate(-90deg)}
+.spin{animation:spin 1.2s linear infinite;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.blink{animation:pulse 1.1s infinite}
+.sk{background:var(--s2);border-radius:10px}
+input.tx{width:100%;background:var(--s1);border:1.5px solid var(--ln2);border-radius:14px;padding:0 16px;height:56px;font-size:18px;font-weight:600;outline:none}
+input.tx:focus{border-color:var(--or)}
+.sharecard{position:relative;border-radius:22px;overflow:hidden;padding:18px;background:linear-gradient(155deg,#1b1410 0%,#0F1115 45%,#3a1a09 100%);border:1px solid var(--ln2)}
+.mrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border-bottom:1px solid var(--ln)}
+.mrow:last-child{border:0}
+@media (max-width:880px){
+ .app{flex-direction:column;align-items:center;gap:16px;padding:16px 8px}
+ .flow{width:100%;max-width:420px;position:static;max-height:none}
+ .flow .lst{display:flex;flex-wrap:wrap;gap:4px}
+ .flow .lst .fl-btn{width:auto}
+ .stagebox{margin:11px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="flow" id="flow"></aside>
+ <div class="stagebox"><div class="phone" id="phone">
+  <div class="notch"></div>
+  <div class="sb"><span>7:02</span><span id="sbr"></span></div>
+  <div class="prog" id="prog"></div>
+  <div class="hdr" id="hdr"></div>
+  <div class="view" id="view"></div>
+  <nav class="nav" id="nav"></nav>
+  <div id="sheetroot"></div>
+  <div class="toast" id="toast"></div>
+  <div class="hi"></div>
+ </div></div>
+</div>
+
+<script>
+/* ---------- constants ---------- */
+const ORDER=['onboarding','mount','players','identify','play','processing','recap','correct','profile'];
+const TITLE={onboarding:'Link a wearable',plan:'Plan session',mount:'Set up your phone',players:'Who is playing?',identify:'Identify yourself',play:'Play',processing:'Processing',recap:'Session recap',correct:'Correct and confirm',profile:'Profile',community:'Community'};
+const HT={onboarding:'Link a wearable',plan:'Plan',mount:'Phone setup',players:'Players',identify:'Identify',play:'Play',processing:'Processing',recap:'Recap',correct:'Confirm',profile:'Profile',community:'Community'};
+const MENU={onboarding:'Link a wearable',plan:'Plan session',mount:'Set up your phone',players:'Who is playing?',identify:'Identify self',play:'Play',processing:'Processing',recap:'Recap',correct:'Correct and confirm',profile:'Profile',community:'Community'};
+const PHASE={onboarding:0,mount:1,players:1,identify:1,play:1,processing:2,recap:2,correct:2,profile:2};
+const PH=['Wearable','On the court','After the session'];
+const PPL=[{id:'you',n:'You',i:'U'},{id:'emily',n:'Emily',i:'E'},{id:'jonathan',n:'Jonathan',i:'J'},{id:'bryant',n:'Bryant',i:'B'},{id:'urbee',n:'Urbee',i:'U'},{id:'trisha',n:'Trisha',i:'T'}];
+const COURTS=[
+ {id:'fg',n:'Fort Greene Park Court',loc:'Brooklyn',t:'park',d:'0.6 mi',note:'Outdoor, 2 hoops. Bring your phone.'},
+ {id:'atl',n:'Atlantic Ave Rec Gym, Court 1',loc:'Brooklyn',t:'gym',d:'1.2 mi',note:'Indoor. Check in at the front desk.'},
+ {id:'p2',n:'Pier 2 Courts',loc:'Brooklyn Bridge Park',t:'park',d:'2.0 mi',note:'Outdoor, 4 hoops. Lights until 10 PM.'}
+];
+const DAYS=[['today','Today','Tue 13'],['wed','Wed','14'],['thu','Thu','15'],['fri','Fri','16'],['sat','Sat','17']];
+const TIMES=[['12pm','12 PM'],['2pm','2 PM'],['4pm','4 PM'],['6pm','6 PM'],['7pm','7 PM']];
+const FREE={bryant:['fri-2pm','fri-4pm','sat-12pm'],emily:['today-6pm','fri-2pm','thu-7pm'],jonathan:['today-6pm','wed-6pm','fri-4pm']};
+const ZN={lc:'Left corner 3',lw:'Left wing 3',tp:'Top of key 3',rw:'Right wing 3',rc:'Right corner 3',ml:'Left midrange',mc:'Middle midrange',mr:'Right midrange',lf:'Left-side finish',rf:'Right-side finish'};
+
+/* ---------- shot data ---------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const RN=mulberry(11);
+const rad=d=>d*Math.PI/180;
+const polar=(a,b)=>{const f=a+RN()*(b-a),r=150+RN()*12;return [150+r*Math.sin(rad(f)),238-r*Math.cos(rad(f))]};
+const ZD=[
+ {k:'lc',g:'3',a:3,m:1,lx:17,ly:212,pos:()=>[8+RN()*16,185+RN()*72]},
+ {k:'lw',g:'3',a:4,m:2,lx:52,ly:100,pos:()=>polar(-58,-30)},
+ {k:'tp',g:'3',a:4,m:2,lx:150,ly:50,pos:()=>polar(-13,13)},
+ {k:'rw',g:'3',a:4,m:2,lx:248,ly:100,pos:()=>polar(30,58)},
+ {k:'rc',g:'3',a:3,m:2,lx:283,ly:212,pos:()=>[276+RN()*16,185+RN()*72]},
+ {k:'ml',g:'2',a:5,m:3,lx:66,ly:205,pos:()=>[52+RN()*44,152+RN()*96]},
+ {k:'mc',g:'2',a:7,m:3,lx:150,ly:126,pos:()=>[120+RN()*60,114+RN()*34]},
+ {k:'mr',g:'2',a:5,m:2,lx:234,ly:205,pos:()=>[204+RN()*44,152+RN()*96]},
+ {k:'lf',g:'r',a:6,m:3,lx:126,ly:192,pos:()=>[112+RN()*26,208+RN()*42]},
+ {k:'rf',g:'r',a:6,m:4,lx:174,ly:192,pos:()=>[162+RN()*26,208+RN()*42]}
+];
+function genShots(){
+ const S=[];
+ ZD.forEach(z=>{
+  let made=Array(z.a).fill(false).fill(true,0,z.m);
+  for(let i=made.length-1;i>0;i--){const j=Math.floor(RN()*(i+1));[made[i],made[j]]=[made[j],made[i]]}
+  const lfSec=[252,570,965,1660,2000,2295];
+  for(let i=0;i<z.a;i++){
+   const [x,y]=z.pos();
+   if(z.k==='lf')made[i]=i<3;
+   S.push({z:z.k,g:z.g,made:made[i],x,y,sec:z.k==='lf'?lfSec[i]:90+Math.floor(RN()*2300),p:'you'});
+  }
+ });
+ S.sort((a,b)=>a.sec-b.sec);
+ S.forEach((s,i)=>s.id='s'+(i+1));
+ const f1=S.find(s=>s.z==='rw'&&s.sec>1100)||S.find(s=>s.z==='rw');f1.flag='Ball was hidden behind a screen';
+ const f2=S.find(s=>s.z==='lf'&&s.sec===2000);f2.flag='Two players at the rim, shooter unclear';
+ return S;
+}
+
+/* ---------- state ---------- */
+function fresh(){return{
+ screen:'onboarding',step:0,hist:[],
+ ob:{pos:'Guard',lvl:'Casual',freq:'Weekly',want:'See my game',watch:false},
+ dev:{name:'This phone'},
+ plan:{court:'fg',day:'today',time:'6pm',inv:{bryant:false,emily:true,jonathan:false}},
+ mountView:null,mt:{start:null,end:null},calibOk:false,gymOk:false,
+ me:0,
+ mode:'multi',team:{emily:true,jonathan:true,bryant:false,urbee:false,trisha:false},
+ play:{i:0,m:0,last:[]},
+ session:{rebounds:9,assists:4},
+ proc:{i:0},
+ shots:genShots(),corr:[],draft:{},justConfirmed:false,
+ cmode:'both',zsel:null,trend:'fg',
+ hoop:'idle',hl:0,sheet:null,
+ feed:[
+  {w:'Bryant',t:'Hit 5 threes in a row at Pier 2 Courts',s:'2h ago'},
+  {w:'Emily',t:'New personal best: 21 makes in one session',s:'Yesterday'}
+ ],
+ chal:false
+}}
+const state=fresh();
+const alt={frame:false,disc:false,low:false,partial:false,offline:false};
+let timers=[];
+const clearTimers=()=>{timers.forEach(t=>{clearTimeout(t);clearInterval(t)});timers=[]};
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const ICONS={
+ back:'<path d="M15 5l-7 7 7 7"/>',chev:'<path d="M9 5l7 7-7 7"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ recap:'<path d="M5 20V11M12 20V4M19 20v-6"/>',
+ profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+ plan:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+ community:'<circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 6.5a3 3 0 0 1 0 5.8M18 14.3c2.2.6 3.5 2.4 3.5 5"/>',
+ play:'<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>',
+ alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+ wifioff:'<path d="M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 4-2.4M19 12.5a10 10 0 0 0-5.5-2.9M12 20h.01"/>',
+ share:'<path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+ bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ shield:'<path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ bt:'<path d="M7 7l10 10-5 4V3l5 4L7 17"/>',
+ qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14v2M14 19h2M18 19h3v2"/>',
+ batt:'<rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3"/>',
+ linkoff:'<path d="M3 3l18 18M10 6.5l1-1a4.5 4.5 0 0 1 6.4 6.4l-1 1M14 17.5l-1 1a4.5 4.5 0 0 1-6.4-6.4l1-1"/>',
+ pin:'<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ flag:'<path d="M6 21V4M6 5h11l-2 4 2 4H6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+ sync:'<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>',
+ target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ up:'<path d="M12 19V5M6 11l6-6 6 6"/>'
+};
+function icon(n,s=20,sw=2){return `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const pct=(m,a)=>a?Math.round(100*m/a):0;
+const av=(p,sz=44,on=false)=>`<span class="av ${on?'on':''}" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.46)}px">${p.i}</span>`;
+const person=id=>PPL.find(p=>p.id===id);
+const court=()=>COURTS.find(c=>c.id===state.plan.court);
+const ctype=()=>state.mountView||court().t;
+const batt=()=>alt.low?12:82;
+const tagC=c=>c.t==='park'?'<span class="tag or">Park</span>':'<span class="tag wh">Gym</span>';
+const mine=()=>state.shots.filter(s=>s.p==='you'&&!s.rm);
+function stats(){const a=mine();const m=a.filter(s=>s.made).length;return{m,a:a.length,fg:pct(m,a.length),points:a.reduce((total,shot)=>total+(shot.made?(shot.g==='3'?3:2):0),0)}}
+function zs(k){const a=mine().filter(s=>s.z===k);return{a:a.length,m:a.filter(s=>s.made).length}}
+function groupStats(g){const shots=mine().filter(s=>s.g===g),m=shots.filter(s=>s.made).length;return{m,a:shots.length,fg:pct(m,shots.length),points:m*(g==='3'?3:2)}}
+function gs(g){return groupStats(g).fg}
+const zcls=p=>p>=75?'hot':p>=60?'warm':'cold';
+const clipOf=()=>{const f=(z)=>mine().find(s=>s.z===z&&s.made)||state.shots.find(s=>s.z===z);return[
+ {t:'Step-back three',s:f('tp')},{t:'And-one finish, right side',s:f('rf')},{t:'Pull-up midrange',s:f('mc')}]};
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),1900)}
+
+/* ---------- step logic ---------- */
+function mountSteps(){return ctype()==='gym'?['checkin','place','frame','calibrate','ready']:['place','frame','calibrate','ready']}
+function nsteps(sc=state.screen){return({mount:mountSteps().length})[sc]||1}
+
+/* ---------- illustrations ---------- */
+function phoneSVG(w=120,led='on'){
+ const c=led==='off'?'#3A404B':'#F26A21';
+ return `<svg viewBox="0 0 80 120" width="${w}" aria-hidden="true"><rect x="14" y="6" width="52" height="96" rx="10" fill="#1F232B" stroke="#4a5160" stroke-width="2.5"/><rect x="20" y="16" width="40" height="76" rx="4" fill="#0F1115"/><circle cx="40" cy="12" r="1.8" fill="#4a5160"/><circle cx="40" cy="54" r="12" fill="none" stroke="${c}" stroke-width="3"/><circle cx="40" cy="54" r="4.5" fill="${c}"${led==='pulse'?' class="blink"':''}/><rect x="31" y="107" width="18" height="4" rx="2" fill="#3A404B"/></svg>`}
+function placeSVG(){return `<svg viewBox="0 0 320 200" width="100%" aria-hidden="true">
+ <rect x="236" y="30" width="66" height="46" rx="5" fill="#1b1f26" stroke="#4a5160" stroke-width="3"/>
+ <rect x="256" y="50" width="26" height="20" fill="none" stroke="#F4EFE6" stroke-width="2.5" opacity=".7"/>
+ <path d="M258 74h22l-3 22h-16z" fill="none" stroke="#F4EFE6" stroke-width="2" opacity=".6"/>
+ <path d="M269 76v-4" stroke="#4a5160" stroke-width="3"/><path d="M269 76v100" stroke="#4a5160" stroke-width="4"/>
+ <path d="M20 176h280" stroke="#3A404B" stroke-width="3" stroke-linecap="round"/>
+ <path d="M70 120L215 66M70 150L215 96" stroke="#F26A21" stroke-width="1.5" stroke-dasharray="5 5" opacity=".7"/>
+ <g class="attg"><rect x="46" y="112" width="26" height="46" rx="6" fill="#1F232B" stroke="#F26A21" stroke-width="2.5"/><circle cx="59" cy="124" r="4" fill="#F26A21"/><path d="M59 158l-12 18M59 158l12 18M59 158v18" stroke="#9AA1AB" stroke-width="3" stroke-linecap="round"/></g>
+ <text x="22" y="100" fill="#9AA1AB" font-size="11" font-family="Inter,sans-serif">Prop up your phone</text>
+ <text x="196" y="118" fill="#9AA1AB" font-size="11" font-family="Inter,sans-serif">Hoop and key in view</text></svg>`}
+
+/* camera preview from the backboard */
+function camScene(o={}){
+ const bad=o.bad,lines=o.lines;
+ const g=bad?'transform="rotate(-11 175 130) translate(8 34)"':'';
+ return `<svg viewBox="0 0 350 232" aria-label="Live camera preview">
+ <defs><linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262a31"/><stop offset="1" stop-color="#14171c"/></linearGradient><linearGradient id="wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2027"/><stop offset="1" stop-color="#171a20"/></linearGradient></defs>
+ <g ${g}>
+ <rect x="-40" y="-40" width="430" height="150" fill="url(#wl)"/>
+ <rect x="-40" y="86" width="430" height="190" fill="url(#fl)"/>
+ <polygon points="118,232 232,232 208,118 142,118" fill="none" stroke="#8a919c" stroke-width="2"/>
+ <path d="M142 118H208" stroke="#8a919c" stroke-width="2"/>
+ <ellipse cx="175" cy="118" rx="33" ry="8" fill="none" stroke="#8a919c" stroke-width="1.5"/>
+ <path d="M34 232C54 92 296 92 316 232" fill="none" stroke="#8a919c" stroke-width="2"/>
+ <g transform="translate(262 150)"><circle cx="0" cy="-30" r="7" fill="#6B7280"/><rect x="-9" y="-22" width="18" height="26" rx="6" fill="#6B7280"/></g>
+ ${lines?`<g fill="none" stroke="#F26A21" stroke-width="2.5" stroke-dasharray="6 5"><polygon points="118,232 232,232 208,118 142,118"/><path d="M34 232C54 92 296 92 316 232"/><path d="M142 118H208"/></g><g fill="#F26A21"><circle cx="142" cy="118" r="4.5"/><circle cx="208" cy="118" r="4.5"/><circle cx="118" cy="228" r="4.5"/><circle cx="232" cy="228" r="4.5"/></g>`:''}
+ </g>
+ <g><ellipse cx="175" cy="${bad?262:226}" rx="34" ry="9" fill="none" stroke="#F26A21" stroke-width="4"/><path d="M146 ${bad?264:228}l8 ${bad?0:8}M204 ${bad?264:228}l-8 ${bad?0:8}" stroke="#E8E4DB" stroke-width="1.5" opacity=".6"/></g>
+ ${o.det===false?'':bad?`<rect x="118" y="196" width="114" height="34" rx="8" fill="none" stroke="#E8E4DB" stroke-width="2" stroke-dasharray="5 4"/><text x="175" y="190" text-anchor="middle" fill="#E8E4DB" font-size="11" font-weight="700" font-family="Inter,sans-serif">RIM NOT FULLY IN FRAME</text>`:`<rect x="118" y="196" width="114" height="34" rx="8" fill="none" stroke="#F26A21" stroke-width="2.5"/><text x="175" y="190" text-anchor="middle" fill="#F26A21" font-size="11" font-weight="700" font-family="Inter,sans-serif">RIM DETECTED</text>`}
+ <g transform="translate(14 14)"><rect width="74" height="24" rx="12" fill="rgba(0,0,0,.65)"/><circle cx="14" cy="12" r="4" fill="#F26A21" class="blink"/><text x="26" y="16" fill="#F4EFE6" font-size="11" font-weight="700" font-family="Inter,sans-serif">LIVE</text></g>
+ <g transform="translate(236 14)"><rect width="100" height="24" rx="12" fill="rgba(0,0,0,.65)"/><text x="50" y="16" text-anchor="middle" fill="${bad?'#E8E4DB':'#F4EFE6'}" font-size="11" font-weight="700" font-family="Inter,sans-serif">${bad?'TILT 12 DEG':'LEVEL 0.6 DEG'}</text></g>
+ </svg>`}
+
+function figure(x,y,s,shirt,stroke){return `<g transform="translate(${x} ${y}) scale(${s})"><circle cx="0" cy="-58" r="10" fill="#c8b9a6"/><rect x="-14" y="-47" width="28" height="34" rx="9" fill="${shirt}" stroke="${stroke||'none'}" stroke-width="2"/><rect x="-11" y="-14" width="9" height="30" rx="4" fill="#2b2f37"/><rect x="2" y="-14" width="9" height="30" rx="4" fill="#2b2f37"/></g>`}
+const PLAYERS=[
+ {x:92,y:238,s:1.0,c:'#E8E4DB',d:'white tee, medium build'},
+ {x:200,y:206,s:.82,c:'#6B7280',d:'gray tee, tall build'},
+ {x:290,y:262,s:1.06,c:'#1f6f7a',d:'teal tee, athletic build'},
+ {x:170,y:300,s:1.18,c:'#111318',d:'black tee, broad build',st:'#4a5160'}
+];
+function idScene(){
+ let h=`<svg viewBox="0 0 350 340" aria-label="Live preview, tap yourself"><defs><linearGradient id="fl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262a31"/><stop offset="1" stop-color="#14171c"/></linearGradient></defs>
+ <rect width="350" height="340" fill="url(#fl2)"/><path d="M40 340C60 90 290 90 310 340" fill="none" stroke="#454b57" stroke-width="2"/><polygon points="110,340 240,340 215,120 135,120" fill="none" stroke="#454b57" stroke-width="2"/>
+ <g transform="translate(14 14)"><rect width="74" height="24" rx="12" fill="rgba(0,0,0,.65)"/><circle cx="14" cy="12" r="4" fill="#F26A21" class="blink"/><text x="26" y="16" fill="#F4EFE6" font-size="11" font-weight="700" font-family="Inter,sans-serif">LIVE</text></g>`;
+ PLAYERS.forEach((p,i)=>{
+  const on=state.me===i,w=56*p.s,hh=112*p.s,x0=p.x-w/2,y0=p.y-76*p.s;
+  h+=figure(p.x,p.y,p.s,p.c,p.st);
+  if(on){const L=14;h+=`<g fill="none" stroke="#F26A21" stroke-width="3.5" stroke-linecap="round"><path d="M${x0} ${y0+L}V${y0}H${x0+L}M${x0+w-L} ${y0}H${x0+w}V${y0+L}M${x0} ${y0+hh-L}V${y0+hh}H${x0+L}M${x0+w-L} ${y0+hh}H${x0+w}V${y0+hh-L}"/></g><rect x="${p.x-22}" y="${y0-22}" width="44" height="18" rx="9" fill="#F26A21"/><text x="${p.x}" y="${y0-9}" text-anchor="middle" fill="#0F1115" font-size="11" font-weight="800" font-family="Inter,sans-serif">YOU</text>`}
+  else h+=`<rect x="${x0}" y="${y0}" width="${w}" height="${hh}" rx="8" fill="none" stroke="#9AA1AB" stroke-width="1.5" stroke-dasharray="4 4" opacity=".7"/>`;
+  h+=`<rect data-act="me" data-i="${i}" x="${x0-6}" y="${y0-6}" width="${w+12}" height="${hh+12}" fill="transparent" style="cursor:pointer" role="button" aria-label="Select player ${i+1}"/>`;
+ });
+ return h+'</svg>'}
+
+/* ---------- court chart ---------- */
+const INSIDE='M30 270L30 161.2A142.5 142.5 0 0 1 270 161.2L270 270Z';
+const OUTSIDE='M0 0H300V270H0Z M270 270L270 161.2A142.5 142.5 0 0 0 30 161.2L30 270Z';
+const ZR={lc:[0,161,30,109,'o'],rc:[270,161,30,109,'o'],lw:[0,0,112,161,'o'],tp:[112,0,76,161,'o'],rw:[188,0,112,161,'o'],ml:[0,0,102,270,'i'],mc:[102,0,96,156,'i'],mr:[198,0,102,270,'i'],lf:[102,156,48,114,''],rf:[150,156,48,114,'']};
+function courtSVG(o={}){
+ const zm=o.mode==='zones',small=o.small;
+ let h=`<svg viewBox="0 0 300 270" class="court" aria-label="Half-court shot chart"><defs>
+ <pattern id="hatch${small?'s':''}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#262b33"/><line x1="0" y1="0" x2="0" y2="6" stroke="#6B7280" stroke-width="2"/></pattern>
+ <clipPath id="cin${small?'s':''}"><path d="${INSIDE}"/></clipPath><clipPath id="cout${small?'s':''}"><path d="${OUTSIDE}"/></clipPath></defs>
+ <rect width="300" height="270" fill="#13161b"/>`;
+ if(!o.noZones)Object.keys(ZR).forEach(k=>{
+  const [x,y,w,hh,c]=ZR[k],z=zs(k),p=pct(z.m,z.a),cl=zcls(p);
+  const fill=cl==='cold'?`url(#hatch${small?'s':''})`:'#F26A21';
+  const op=cl==='hot'?(zm?.62:.3):cl==='warm'?(zm?.3:.14):(zm?.95:.5);
+  const clip=c==='o'?`clip-path="url(#cout${small?'s':''})"`:c==='i'?`clip-path="url(#cin${small?'s':''})"`:'';
+  h+=`<g ${clip}><rect ${o.tap?`data-act="zone" data-z="${k}"`:''} x="${x}" y="${y}" width="${w}" height="${hh}" fill="${fill}" opacity="${op}" ${o.tap?'style="cursor:pointer"':''}/>${state.zsel===k&&o.tap?`<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#fff" opacity=".13" pointer-events="none"/>`:''}</g>`;
+ });
+ h+=`<g fill="none" stroke="#5a616d" stroke-width="2" pointer-events="none"><rect x="1" y="1" width="298" height="268"/><rect x="102" y="156" width="96" height="114"/><path d="M114 156A36 36 0 0 1 186 156"/><path d="M114 156A36 36 0 0 0 186 156" stroke-dasharray="4 4"/><path d="M126 238A24 24 0 0 1 174 238"/><path d="M30 270L30 161.2A142.5 142.5 0 0 1 270 161.2L270 270"/><path d="M135 246H165" stroke="#E8E4DB"/></g><circle cx="150" cy="238" r="7" fill="none" stroke="#F26A21" stroke-width="2.5" pointer-events="none"/>`;
+ if(zm&&!small)Object.keys(ZR).forEach(k=>{const z=zs(k),zd=ZD.find(d=>d.k===k);h+=`<text x="${zd.lx}" y="${zd.ly}" text-anchor="middle"><tspan class="zp" x="${zd.lx}">${pct(z.m,z.a)}%</tspan><tspan class="zc" x="${zd.lx}" dy="11">${z.m}/${z.a}</tspan></text>`});
+ const dim=zm?.4:1;
+ mine().forEach(s=>{
+  const r=small?3.2:5.2;
+  let g=`<g class="dot" ${o.tap?`data-act="shot" data-id="${s.id}" role="button" tabindex="0" aria-label="${s.made?'Make':'Miss'}, ${ZN[s.z]}, ${fmt(s.sec)}"`:''} opacity="${dim}">`;
+  if(o.tap)g+=`<circle cx="${s.x}" cy="${s.y}" r="11" fill="transparent"/>`;
+  if(s.made)g+=`<circle cx="${s.x}" cy="${s.y}" r="${r}" fill="#F26A21" stroke="#0F1115" stroke-width="1.5"/>`;
+  else{const d=r*.85;g+=`<path d="M${s.x-d} ${s.y-d}L${s.x+d} ${s.y+d}M${s.x+d} ${s.y-d}L${s.x-d} ${s.y+d}" stroke="#E8E4DB" stroke-width="${small?1.6:2.2}" stroke-linecap="round"/>`}
+  if(s.flag&&!s.res&&!small)g+=`<circle cx="${s.x}" cy="${s.y}" r="9.5" fill="none" stroke="#E8E4DB" stroke-width="1.5" stroke-dasharray="2.5 2.5"/>`;
+  h+=g+'</g>';
+ });
+ return h+'</svg>'}
+
+function clipScene(s,compact){
+ const make=s.made;
+ const path=make?'M96 118Q170 8 244 78L244 126':'M96 118Q170 8 262 70Q292 92 306 156';
+ const off=alt.offline;
+ return `<div class="scene"><svg viewBox="0 0 340 ${compact?170:190}" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="cf${s.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171a20"/><stop offset="1" stop-color="#262a31"/></linearGradient></defs>
+ <rect width="340" height="190" fill="url(#cf${s.id})"/><rect y="156" width="340" height="40" fill="#1d2026"/>
+ <rect x="258" y="38" width="4" height="52" fill="#E8E4DB"/><path d="M232 84H258" stroke="#F26A21" stroke-width="4" stroke-linecap="round"/><path d="M236 86l4 22M252 86l-4 22" stroke="#E8E4DB" stroke-width="1.2" opacity=".5"/>
+ <g transform="translate(78 160) scale(.9)"><circle cx="0" cy="-58" r="10" fill="#c8b9a6"/><rect x="-14" y="-47" width="28" height="34" rx="9" fill="#E8E4DB"/><rect x="-11" y="-14" width="9" height="30" rx="4" fill="#2b2f37"/><rect x="2" y="-14" width="9" height="30" rx="4" fill="#2b2f37"/></g>
+ <path d="${path}" fill="none" stroke="#9AA1AB" stroke-width="1.5" stroke-dasharray="3 5" opacity=".6"/>
+ ${off?'':`<circle r="7" fill="${make?'#F26A21':'#E8E4DB'}" stroke="#0F1115" stroke-width="1.5"><animateMotion dur="1.9s" repeatCount="indefinite" path="${path}"/></circle>`}
+ ${off?`<rect width="340" height="190" fill="rgba(15,17,21,.78)"/><text x="170" y="92" text-anchor="middle" fill="#F4EFE6" font-size="14" font-weight="700" font-family="Inter,sans-serif">Clip ready after sync</text><text x="170" y="112" text-anchor="middle" fill="#9AA1AB" font-size="12" font-family="Inter,sans-serif">Saved on this phone</text>`:''}
+ <rect x="12" y="12" width="64" height="22" rx="11" fill="rgba(0,0,0,.65)"/><text x="44" y="27" text-anchor="middle" fill="#F4EFE6" font-size="11" font-weight="700" font-family="Inter,sans-serif">${fmt(s.sec)}</text>
+ <rect x="12" y="${compact?146:166}" width="316" height="4" rx="2" fill="#3A404B"/><rect x="12" y="${compact?146:166}" width="190" height="4" rx="2" fill="#F26A21"/></svg></div>`}
+
+function thumbSVG(i){const c=['#2a1a10','#1a222a','#221a2a'][i%3];
+ return `<svg viewBox="0 0 158 104" width="158" height="104" aria-hidden="true"><rect width="158" height="104" fill="${c}"/><rect y="78" width="158" height="26" fill="#1d2026"/><rect x="122" y="22" width="3" height="28" fill="#E8E4DB"/><path d="M106 48H122" stroke="#F26A21" stroke-width="3" stroke-linecap="round"/><g transform="translate(34 88) scale(.55)"><circle cx="0" cy="-58" r="10" fill="#c8b9a6"/><rect x="-14" y="-47" width="28" height="34" rx="9" fill="#E8E4DB"/><rect x="-11" y="-14" width="9" height="30" rx="4" fill="#2b2f37"/><rect x="2" y="-14" width="9" height="30" rx="4" fill="#2b2f37"/></g><path d="M44 52Q80 6 112 44" fill="none" stroke="#9AA1AB" stroke-width="1.2" stroke-dasharray="3 4"/></svg>`}
+
+/* ---------- banners ---------- */
+function banners(sc){
+ let h='';
+ const live=['mount','identify','play','processing','recap'].includes(sc);
+ if(live&&alt.offline)h+=`<div class="note">${icon('wifioff')}<div><b>Offline court</b>Recording locally, will sync later.</div></div>`;
+ if(['identify','play'].includes(sc)&&alt.low)h+=`<div class="note warn">${icon('alert')}<div><b>Phone battery low, 12%</b>About 20 minutes of recording left. Plug in after this session or bring a battery pack.</div></div>`;
+ return h}
+
+/* ---------- screens ---------- */
+function onboarding(){
+ const o=state.ob,s=4;
+ const L={
+  0:{k:'pos',h:'What do you play?',sub:'Pick the spot you play most.',l:[['Guard','Handles and shoots'],['Wing','Slashes and shoots'],['Big','Works inside'],['Whatever is open','Pickup, all positions']]},
+  1:{k:'lvl',h:'Your skill level?',sub:'Be honest. It only tunes your insights.',l:[['Just starting out','Learning the game'],['Casual','Play for fun'],['Solid','Reliable shot, plays often'],['Competitive','Plays to win every run']]},
+  2:{k:'freq',h:'How often do you play?',sub:'We use this to set your goals.',l:[['A few times a year',''],['Monthly',''],['Weekly',''],['3 or more times a week','']]}
+ };
+ let h='<div class="pg">';
+ if(s===0)h+=`<div class="row" style="margin-bottom:14px"><span style="color:var(--or)">${icon('target',44)}</span><div><div class="h2" style="font-size:26px">Courtside</div><div class="xs mu">Turn any court into your smart court.</div></div></div>`;
+ if(s<=2){const c=L[s];h+=`<div class="h1">${c.h}</div><p class="lead">${c.sub}</p>`;
+  c.l.forEach(([t,d])=>{const on=o[c.k]===t;h+=`<button class="opt ${on?'on':''}" data-act="ob" data-k="${c.k}" data-v="${t}" aria-pressed="${on}"><span class="grow"><span class="t">${t}</span>${d?`<span class="s">${d}</span>`:''}</span><span class="radio">${on?icon('check',16,3):''}</span></button>`})}
+ if(s===3){h+=`<div class="h1">What do you want most?</div><p class="lead">We will shape your recap around it.</p>`;
+  [['See my game','Stats, shot chart and clips from every run','recap'],['Get better','Spot tendencies and take on challenges','bolt'],['Play more','Find friends and open runs near you','community']].forEach(([t,d,ic])=>{const on=o.want===t;h+=`<button class="opt ${on?'on':''}" style="min-height:84px" data-act="ob" data-k="want" data-v="${t}" aria-pressed="${on}"><span style="color:var(--or)">${icon(ic,28)}</span><span class="grow"><span class="t" style="font-family:var(--disp);font-size:24px;text-transform:uppercase;letter-spacing:.02em">${t}</span><span class="s">${d}</span></span><span class="radio">${on?icon('check',16,3):''}</span></button>`})}
+ if(s===4){h+=`<div class="h1">Link a wearable</div><p class="lead">Optional. Adds heart rate and movement to your recap later. You can skip this.</p>
+  <button class="opt ${o.watch?'on':''}" data-act="ob" data-k="watch" data-v="${!o.watch}" aria-pressed="${o.watch}"><span style="color:var(--or)">${icon('target',26)}</span><span class="grow"><span class="t">Smartwatch or heart rate strap</span><span class="s">${o.watch?'Linked. Change anytime in Profile.':'Tap to link'}</span></span><span class="radio">${o.watch?icon('check',16,3):''}</span></button>
+  <div class="note gap14"><div style="color:var(--or)">${icon('lock')}</div><div>Wearable data stays on your account and is never shared with other players.</div></div>`}
+ return h+'</div>'}
+
+function plan(){
+ const p=state.plan;
+ let h=`<div class="pg"><div class="h1">Plan a session</div><p class="lead">Pick a court and a time. Friends get an invite.</p><div class="lbl gap20">Court</div>`;
+ COURTS.forEach(c=>{const on=p.court===c.id;h+=`<button class="opt ${on?'on':''}" data-act="pcourt" data-v="${c.id}" aria-pressed="${on}"><span class="grow"><span class="t">${c.n}</span><span class="s">${c.loc} · ${c.d}</span><span class="s">${c.t==='park'?'Park: prop up your phone':'Gym: use your phone'}. ${c.note}</span></span>${tagC(c)}</button>`});
+ h+=`<div class="lbl gap20">Day</div><div class="chips gap8">${DAYS.map(([k,a,b])=>`<button class="chip ${p.day===k?'on':''}" data-act="pday" data-v="${k}">${a} ${b}</button>`).join('')}</div>`;
+ h+=`<div class="lbl gap20">Time (1 hour)</div><div class="chips gap8">${TIMES.map(([k,a])=>`<button class="chip ${p.time===k?'on':''}" data-act="ptime" data-v="${k}">${a}</button>`).join('')}</div>`;
+ h+=`<div class="lbl gap20">Invite friends</div><div class="who gap8" style="margin-bottom:6px">`;
+ PPL.slice(1).forEach(f=>{const on=p.inv[f.id],free=(FREE[f.id]||[]).includes(p.day+'-'+p.time);h+=`<button class="${on?'on':''}" data-act="pinv" data-v="${f.id}" aria-pressed="${on}">${av(f,48,on)}<span>${f.n}</span><span class="xs ${free?'or':'mu'}" style="font-weight:600">${on?'Invited':free?'Free then':'Invite'}</span></button>`});
+ h+='</div>';
+ const dn=DAYS.find(d=>d[0]===p.day),tn=TIMES.find(t=>t[0]===p.time);
+ h+=`<div class="card gap14"><div class="lbl">Summary</div><div class="gap8" style="font-size:15px;line-height:1.5"><b>${dn[1]} ${dn[2]}, ${tn[1]}</b><br>${court().n} ${tagC(court())}<br><span class="mu sm">${Object.keys(p.inv).filter(k=>p.inv[k]).map(k=>person(k).n).join(', ')||'No friends invited yet'}</span></div></div></div>`;
+ return h}
+
+function mount(){
+ const steps=mountSteps(),k=steps[state.step],ty=ctype(),c=court();
+ const est={checkin:'10 sec',place:'20 sec',frame:'15 sec',calibrate:'15 sec',ready:''};
+ if(!state.mt.start)state.mt.start=Date.now();
+ if(k==='ready'&&!state.mt.end)state.mt.end=Date.now();
+ const el=((state.mt.end||Date.now())-state.mt.start)/1000;
+ let h=`<div class="pg">`;
+ h+=`<div class="seg" style="margin-bottom:12px" role="group" aria-label="Preview court type"><button class="${ty==='park'?'on':''}" data-act="mview" data-v="park">Preview: Park</button><button class="${ty==='gym'?'on':''}" data-act="mview" data-v="gym">Preview: Gym</button></div>`;
+ h+=`<div class="timer"><div><div class="lbl">Setup time</div><div class="xs mu">Goal: under 1:00${est[k]?` · this step ~${est[k]}`:''}</div></div><b id="mtimer">${fmt(el)}</b></div>`;
+ h+=banners('mount');
+ if(k==='checkin')h+=`<div class="h1">Check in at the court</div><p class="lead">${ty==='gym'?'Atlantic Ave Rec Gym, Court 1':c.n}. Show your membership at the front desk or enter the court code.</p><div class="card gap20"><div class="row"><span style="color:var(--or)">${icon('qr',32)}</span><div style="flex:1"><b>Court code</b><div class="xs mu">Posted at the front desk</div></div><span class="h2" style="font-size:30px">ATL-01</span></div></div><div class="note">${icon('lock')}<div><b>Your phone only</b>Courtside records only your court, from your own phone.</div></div>`;
+ if(k==='place'){h+=`<div class="h1">Prop up your phone</div><p class="lead">Landscape, near the sideline, with the hoop and key in view. A fence, a bag or a tripod all work. No extra hardware needed.</p><div class="illus">${placeSVG()}<div class="cap">Any steady spot works</div></div>`;
+  if(ty==='park')h+=`<div class="note gap14">${icon('shield')}<div><b>Privacy at public courts</b>Other people may be in frame. Courtside only analyzes shots, blurs faces in saved clips and never identifies anyone.</div></div>`;
+  else h+=`<button class="opt ${state.gymOk?'on':''} gap14" data-act="gymok" aria-pressed="${state.gymOk}"><span class="grow"><span class="t">Confirm the gym allows filming</span><span class="s">Ask the front desk before you start recording.</span></span><span class="radio">${state.gymOk?icon('check',16,3):''}</span></button>`;
+  h+=`<div class="note gap14">${icon('target')}<div><b>Optional mount, later</b>A clip-on hoop mount for a steadier view may come later. You do not need it.</div></div>`}
+ if(k==='frame'){const bad=alt.frame;h+=`<div class="h1">Hoop in frame?</div><p class="lead">${bad?'The phone is tilted and the rim is cut off.':'Make sure the rim and key are in view.'}</p><div class="scene gap14">${camScene({bad})}</div>
+  <div class="card gap14" style="padding:6px 16px"><div class="chk ${bad?'bad':'done'}"><span class="ci">${icon(bad?'alert':'check',14,3)}</span><span>Rim in frame</span><span class="r">${bad?'Cut off':'Detected'}</span></div><div class="chk ${bad?'bad':'done'}"><span class="ci">${icon(bad?'alert':'check',14,3)}</span><span>Phone level</span><span class="r">${bad?'Tilted 12 deg':'0.6 deg'}</span></div></div>
+  ${bad?`<div class="note warn">${icon('alert')}<div><b>Phone not level</b>Straighten the phone until the rim sits inside the box, then re-check.</div></div>`:''}`}
+ if(k==='calibrate')h+=`<div class="h1">Confirm court lines</div><p class="lead">We found the key, free throw line and three-point arc. Do these look right?</p><div class="scene gap14">${camScene({lines:true,det:false})}</div><div class="chips gap14"><span class="chip on">${icon('check',14,3)} Key</span><span class="chip on">${icon('check',14,3)} Free throw line</span><span class="chip on">${icon('check',14,3)} 3-point arc</span></div>`;
+ if(k==='ready'){const tt=fmt(el);h+=`<div style="text-align:center;padding-top:6px"><div style="width:84px;height:84px;border-radius:50%;background:var(--or);color:#0F1115;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">${icon('check',46,3)}</div><div class="h1">Ready</div><p class="lead">Set up in <b style="color:var(--tx)">${tt}</b>. Nice and quick.</p></div>
+  <div class="card gap20"><div class="mrow" style="padding-top:0"><span class="mu">${icon('pin')}</span><span>${c.n}</span><span style="margin-left:auto">${tagC({t:ty})}</span></div><div class="mrow"><span class="mu">${icon('batt')}</span><span>${state.dev.name}</span><b style="margin-left:auto">${batt()}%</b></div><div class="mrow"><span class="mu">${icon('target')}</span><span>Hoop and court lines</span><b style="margin-left:auto">Locked</b></div><div class="mrow" style="padding-bottom:0"><span class="mu">${icon(alt.offline?'wifioff':'sync')}</span><span>Sync</span><b style="margin-left:auto">${alt.offline?'Offline, record locally':'Online'}</b></div></div>`;
+  if(ty==='park')h+=`<div class="note">${icon('shield')}<div>People nearby may appear in frame. Faces are blurred in saved clips.</div></div>`}
+ return h+'</div>'}
+
+function identify(){
+ const p=PLAYERS[state.me];
+ return `<div class="pg"><div class="h1">Which one is you?</div><p class="lead">Tap yourself in the live view. We suggested the closest player.</p>${banners('identify')}
+ <div class="scene gap14">${idScene()}</div>
+ <div class="note ok gap14">${icon('shield')}<div><b>No face recognition</b>Courtside matches your shirt color and body shape for this session only, then forgets them.</div></div>
+ <div class="card"><div class="lbl">Selected</div><div class="gap8" style="font-size:15px"><b>You</b> · ${p.d}</div></div></div>`}
+
+function players(){
+  return `<div class="pg"><div class="h1">Who is playing?</div><p class="lead">Solo tracks only you. Multi-player adds rebounds, assists and team score.</p>
+  ${[['solo','Solo','Just me, working on my shot'],['multi','Multi-player','Pickup with others on court']].map(([k,t,d])=>`<button class="opt ${state.mode===k?'on':''}" data-act="pmode" data-v="${k}" aria-pressed="${state.mode===k}"><span class="grow"><span class="t">${t}</span><span class="s">${d}</span></span><span class="radio">${state.mode===k?icon('check',16,3):''}</span></button>`).join('')}
+  ${state.mode==='multi'?`<div class="lbl gap20">On court with you</div><div class="who gap8">${PPL.slice(1).map(f=>{const on=state.team[f.id];return `<button class="${on?'on':''}" data-act="pteam" data-v="${f.id}" aria-pressed="${on}">${av(f,48,on)}<span>${f.n}</span></button>`}).join('')}</div>`:''}</div>`}
+
+function play(){
+ const p=state.play,warn=alt.disc;
+ const pc=p.i?pct(p.m,p.i):0;
+ return `<div class="pg">${banners('play')}
+ <div class="rowb"><span class="live ${warn?'warn':''}" id="plive"><i></i><span>${warn?'Paused':'Tracking'}</span></span><div class="xs mu row" style="gap:6px">${icon('batt',18)}<b style="color:var(--tx)">Phone ${batt()}%</b></div></div>
+ ${warn?`<div class="note warn gap14">${icon('linkoff')}<div><b>Recording stopped</b>Shots are not being tracked. Check the phone is still propped up and Courtside is open.</div></div>`:''}
+ <div style="text-align:center;margin-top:${warn?4:26}px;${warn?'opacity:.4':''}"><div class="lbl">Makes / attempts</div>
+  <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:8px"><span class="big or" id="pm" style="font-size:170px">${p.m}</span><span class="big mu" style="font-size:70px">/</span><span class="big" id="pa" style="font-size:96px">${p.i}</span></div>
+  <div class="big" id="ppct" style="font-size:46px;margin-top:10px">${pc}% FG</div><div class="xs mu gap8" id="ptime">${fmt(p.i*52.3)} elapsed · ${state.mode==='multi'?'Multi-player':'Solo'}</div></div>
+ <div class="row gap20" style="justify-content:center;gap:10px" id="plast">${p.last.map(x=>x==='m'?`<span title="Make" style="width:26px;height:26px;border-radius:50%;background:var(--or);display:inline-block"></span>`:`<span title="Miss" style="color:var(--ms);width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center">${icon('x',24,3)}</span>`).join('')}</div></div>`}
+
+function processing(){
+ const i=state.proc.i;
+ const names=['Uploading footage from your phone','Finding every shot','Matching shots to you','Cutting highlight clips'];
+ const off=alt.offline,part=alt.partial;
+ return `<div class="pg" style="text-align:center"><div class="h1" style="margin-top:6px">Building your session</div><p class="lead">${off?'Saved on this phone. We will finish when you are back online.':'Hang tight, this takes about a minute.'}</p>
+ <div style="margin:22px auto 10px;width:150px;height:150px;position:relative"><svg class="ring" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" fill="none" stroke="#2A2F38" stroke-width="10"/><circle cx="75" cy="75" r="64" fill="none" stroke="#F26A21" stroke-width="10" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="${402*(1-Math.min(i,4)/4)}" style="transition:stroke-dashoffset .6s"/></svg><div class="big" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px">${Math.round(Math.min(i,4)*25)}%</div></div>
+ ${banners('processing')}
+ <div class="card" style="text-align:left;padding:6px 16px;margin-top:14px">${names.map((n,k)=>{const done=i>k;const w=part&&k===1&&done;return `<div class="chk ${done?(w?'bad':'done'):''}"><span class="ci">${done?icon(w?'alert':'check',14,3):''}</span><span style="flex:1">${n}</span>${w?'<span class="r">Some unclear</span>':!done&&i===k?`<span class="r blink">Working</span>`:''}</div>`}).join('')}</div>
+ ${part&&i>=2?`<div class="note warn" style="text-align:left">${icon('alert')}<div><b>Partial session, some shots unclear</b>Tracking dropped for about 6 minutes. You can review the unclear shots next.</div></div>`:''}</div>`}
+
+function recap(){
+ const s=stats(),flagged=mine().filter(x=>x.flag&&!x.res);
+ const clips=clipOf(),zsel=state.zsel;
+ const early=mine().filter(x=>x.z==='lf'&&x.sec<1200),late=mine().filter(x=>x.z==='lf'&&x.sec>=1200);
+ const em=early.filter(x=>x.made).length,lm=late.filter(x=>x.made).length;
+ let h=`<div class="pg"><div class="rowb"><div><div class="lbl">Session recap</div><div class="h1" style="font-size:32px;margin-top:4px">${court().n.split(',')[0]}</div><div class="mu sm gap8">Tue, Oct 13 · 6:10 PM · 41 min · ${state.mode==='multi'?'Pickup':'Solo'}</div></div><button class="ib" data-act="sheet" data-t="share" aria-label="Share session">${icon('share')}</button></div>`;
+ h+=banners('recap');
+ if(alt.partial)h+=`<div class="note warn gap14">${icon('alert')}<div><b>Partial session, some shots unclear</b>The camera lost tracking from 24:10 for about 6 minutes. Counts may be low.</div></div>`;
+ if(alt.offline)h+=`<div class="note gap14">${icon('sync')}<div><b>Sync pending</b>These are local stats. Clips and insights fill in after sync.</div></div>`;
+ h+=`<div class="hero"><div><div class="big or" style="font-size:78px">${s.points}</div><div class="lbl gap8">Points</div></div><div><div class="big" style="font-size:78px">${state.mode==='multi'?state.session.rebounds:'—'}</div><div class="lbl gap8">Rebounds</div></div><div><div class="big" style="font-size:78px">${state.mode==='multi'?state.session.assists:'—'}</div><div class="lbl gap8">Assists</div></div></div>${state.mode==='solo'?'<div class="xs mu gap8">Rebounds and assists are tracked in multi-player sessions.</div>':''}`;
+ h+=`<div class="cov"><div class="covb">${alt.partial?'<i style="left:0;width:59%"></i><i class="gp" style="left:59%;width:14.6%"></i><i style="left:73.6%;width:26.4%"></i>':'<i style="left:0;width:100%"></i>'}</div><div class="xs mu gap8">${alt.partial?'Tracked 35 of 41 min. Hatched part = tracking gap.':'Tracked the full 41 min.'}</div></div>`;
+ h+=`<div class="stat3 gap14" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr))">${[['Overall FG',s],['Mid-range',groupStats('2')],['Three-point',groupStats('3')],['At rim',groupStats('r')]].map(([label,st])=>`<div><div class="big" style="font-size:34px">${st.fg}%</div><div class="lbl gap8">${label}</div><div class="xs mu gap8">${st.m} / ${st.a} made</div></div>`).join('')}</div>`;
+ h+=`<div class="card gap14" style="margin-top:14px"><div class="rowb"><div class="h2">Shot chart</div><div class="seg" style="width:150px"><button class="${state.cmode==='both'?'on':''}" data-act="cmode" data-v="both">Shots</button><button class="${state.cmode==='zones'?'on':''}" data-act="cmode" data-v="zones">Zones</button></div></div>
+ <div class="gap14">${courtSVG({mode:state.cmode,tap:true})}</div>
+ <div class="xs gap8" style="min-height:34px;line-height:1.5">${zsel?`<b>${ZN[zsel]}</b>: ${zs(zsel).m} of ${zs(zsel).a} (${pct(zs(zsel).m,zs(zsel).a)}%). ${zcls(pct(zs(zsel).m,zs(zsel).a))==='hot'?'Hot zone.':zcls(pct(zs(zsel).m,zs(zsel).a))==='cold'?'Cold zone.':'Steady.'}`:'<span class="mu">Tap a shot to see its clip, or a zone for details.</span>'}</div>
+ <div class="row gap14" style="flex-wrap:wrap;gap:12px 16px;font-size:12px;color:var(--mu)"><span class="row" style="gap:6px"><svg width="14" height="14"><circle cx="7" cy="7" r="5.5" fill="#F26A21"/></svg>Make</span><span class="row" style="gap:6px"><svg width="14" height="14"><path d="M2 2L12 12M12 2L2 12" stroke="#E8E4DB" stroke-width="2"/></svg>Miss</span><span class="row" style="gap:6px"><svg width="14" height="14"><rect x=".5" y=".5" width="13" height="13" fill="#F26A21" opacity=".6"/></svg>Hot 75%+</span><span class="row" style="gap:6px"><svg width="14" height="14"><defs><pattern id="lg" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#262b33"/><line x1="0" y1="0" x2="0" y2="5" stroke="#6B7280" stroke-width="2"/></pattern></defs><rect x=".5" y=".5" width="13" height="13" fill="url(#lg)"/></svg>Cold under 60%</span></div></div>`;
+ h+=alt.offline?`<div class="card"><div class="row"><span class="mu">${icon('bolt')}</span><div><b>Insight arrives after sync</b><div class="xs mu">We need the full session to spot patterns.</div></div></div></div>`
+  :`<div class="card" style="border-color:rgba(242,106,33,.5)"><div class="row" style="align-items:flex-start"><span style="color:var(--or);margin-top:2px">${icon('bolt',24)}</span><div><div class="lbl or">Insight${alt.partial?' · lower confidence':''}</div><div class="h2 gap8" style="font-size:26px">Left-side finishing dropped late in the session</div><div class="sm mu gap8">${em} of ${early.length} before 20:00, ${lm} of ${late.length} after. Tap the left side of the paint on the chart.</div></div></div></div>`;
+ h+=`<div class="rowb gap20"><div class="h2">Highlights</div><span class="xs mu">${alt.offline?'After sync':'3 clips'}</span></div><div class="clips gap14">${clips.map((c,i)=>alt.offline?`<div class="clipc"><div class="thumb dash">${icon('sync',22)}<span>Clip ready after sync</span></div><div class="sm gap8"><b>${c.t}</b></div></div>`:`<button class="clipc" data-act="shot" data-id="${c.s.id}"><div class="thumb">${thumbSVG(i)}<span class="pb">${icon('play',16)}</span><span class="tm">${fmt(c.s.sec)}</span></div><div class="sm gap8"><b>${c.t}</b></div></button>`).join('')}</div>`;
+ h+=`<div class="rowb gap20"><div class="h2">Check these shots</div><span class="tag wh">${flagged.length} flagged</span></div><div class="gap14">${flagged.length?flagged.map(f=>`<button class="flag" data-act="shot" data-id="${f.id}"><span class="fq">${icon('flag',20)}</span><span style="flex:1"><b style="display:block">Check this shot?</b><span class="xs mu">${ZN[f.z]} · ${fmt(f.sec)}. ${f.flag}.</span></span><span class="mu">${icon('chev')}</span></button>`).join(''):`<div class="note ok">${icon('check')}<div>No shots left to check.</div></div>`}</div>`;
+ h+=`<div class="card gap14"><div class="rowb"><div class="h2">Scoring breakdown</div><span class="tag">Your points</span></div><div class="stat3 gap14">${[['Mid-range','2'],['Three-point','3'],['At rim','r']].map(([label,g])=>`<div><div class="big${g==='3'?' or':''}" style="font-size:34px">${groupStats(g).points}</div><div class="lbl gap8">${label}</div></div>`).join('')}</div><div class="xs mu gap8">${s.points} points from ${s.m} makes on ${s.a} attempts.</div></div>`;
+ h+=`<div class="card"><div class="rowb"><div class="h2">Advanced stats</div><span class="tag">Coming soon</span></div><div class="gap8">${['Release time','Jump height','Distance covered','Shot speed and arc'].map(x=>`<div class="soon">${icon('lock',16)}<span>${x}</span></div>`).join('')}</div></div></div>`;
+ return h}
+
+function correct(){
+ const ids=state.corr.length?state.corr:mine().filter(x=>x.flag&&!x.res).map(x=>x.id);
+ let h=`<div class="pg"><div class="h1">Fix ${ids.length>1?'these shots':'this shot'}</div><p class="lead">Flip a wrong make or miss, or change who took it.</p>`;
+ if(!ids.length)h+=`<div class="note ok gap20">${icon('check')}<div>Nothing to fix. Confirm to save your session.</div></div>`;
+ ids.forEach((id,n)=>{const s=state.shots.find(x=>x.id===id);const d=state.draft[id]||(state.draft[id]={made:s.made,p:s.p});
+  h+=`<div class="card gap20"><div class="rowb"><b>${ids.length>1?`Shot ${n+1} of ${ids.length}`:'Flagged shot'}</b><span class="xs mu">${ZN[s.z]} · ${fmt(s.sec)}</span></div><div class="gap14">${clipScene({...s,made:d.made},true)}</div>
+  ${s.flag?`<div class="xs mu gap8">Check this shot? ${s.flag}.</div>`:''}
+  <div class="lbl gap14">What happened?</div><div class="chips gap8" style="flex-wrap:nowrap"><button class="chip ${d.made?'on':''}" style="flex:1;justify-content:center;min-height:52px" data-act="cmade" data-id="${id}" data-v="1" aria-pressed="${d.made}">${icon('check',18,3)} Make</button><button class="chip ${!d.made?'on':''}" style="flex:1;justify-content:center;min-height:52px" data-act="cmade" data-id="${id}" data-v="0" aria-pressed="${!d.made}">${icon('x',18,3)} Miss</button></div>
+  <div class="lbl gap14">Who took it?</div><div class="who gap8">${PPL.map(p=>`<button class="${d.p===p.id?'on':''}" data-act="cwho" data-id="${id}" data-v="${p.id}" aria-pressed="${d.p===p.id}">${av(p,44,d.p===p.id)}<span>${p.n}</span></button>`).join('')}</div></div>`});
+ h+=`<div class="note">${icon('sync')}<div>Your corrections help improve accuracy.</div></div></div>`;
+ return h}
+
+function trendSVG(){
+ const k=state.trend,s=stats();
+ const hist={fg:[58,61,55,64,66,63,68],'3p':[38,42,35,48,52,50,57],vol:[31,38,29,44,40,42,45]};
+ const cur={fg:s.fg,'3p':gs('3'),vol:s.a}[k];
+ const v=[...hist[k],cur],lab=['Aug 28','Sep 3','Sep 10','Sep 17','Sep 24','Oct 1','Oct 6','Today'];
+ const mx=Math.max(...v)*1.12;
+ let h=`<svg viewBox="0 0 330 170" width="100%" role="img" aria-label="Trend across sessions">`;
+ v.forEach((x,i)=>{const bh=x/mx*118,xx=8+i*40,last=i===v.length-1;h+=`<rect x="${xx}" y="${130-bh}" width="28" height="${bh}" rx="6" fill="${last?'#F26A21':'#3A404B'}"/><text x="${xx+14}" y="${124-bh}" text-anchor="middle" fill="${last?'#F4EFE6':'#9AA1AB'}" font-size="11" font-weight="700" font-family="Inter,sans-serif">${x}${k==='vol'?'':'%'}</text><text x="${xx+14}" y="148" text-anchor="middle" fill="#9AA1AB" font-size="8.5" font-family="Inter,sans-serif">${lab[i]}</text>`});
+ return h+'</svg>'}
+
+function profile(){
+ const s=stats(),o=state.ob,clips=clipOf();
+ const bests=[['Best FG%',Math.max(68,s.fg)+'%',s.fg>=68],['Most makes',Math.max(24,s.m),s.m>=24],['Best 3PT%',Math.max(57,gs('3'))+'%',gs('3')>=57],['Make streak','9','']];
+ const dd=alt.disc?'Recording paused':'Ready to record';
+ let h=`<div class="pg">`;
+ if(state.justConfirmed)h+=`<div class="note ok">${icon('check')}<div><b>Session confirmed</b>${s.m} makes on ${s.a} attempts added to your profile.</div></div>`;
+ h+=`<div class="row" style="gap:14px"><span class="av" style="width:68px;height:68px;font-size:32px;border-color:var(--or)">U</span><div><div class="h1" style="font-size:34px">Urbee</div><div class="chips gap8"><span class="tag">${o.pos}</span><span class="tag">${o.lvl}</span><span class="tag">${o.freq}</span></div></div></div>
+ <div class="stat3 gap20"><div><div class="big" style="font-size:34px">9</div><div class="lbl gap8">Sessions</div></div><div><div class="big" style="font-size:34px">3</div><div class="lbl gap8">Courts</div></div><div><div class="big" style="font-size:34px">${312+s.a}</div><div class="lbl gap8">Shots</div></div></div>
+ <div class="card gap14"><div class="rowb"><div class="h2">Trends</div></div><div class="seg gap14">${[['fg','FG%'],['3p','3PT%'],['vol','Shots']].map(([k,t])=>`<button class="${state.trend===k?'on':''}" data-act="trend" data-v="${k}">${t}</button>`).join('')}</div><div class="gap14">${trendSVG()}</div><div class="xs mu">Tendency to watch: left-side finishing late in sessions.</div></div>
+ <div class="h2">Personal bests</div><div class="stat3 gap14" style="flex-wrap:wrap">${bests.map(([a,b,n])=>`<div style="flex:1 1 44%"><div class="rowb"><div class="big" style="font-size:36px">${b}</div>${n?'<span class="tag or">New</span>':''}</div><div class="lbl gap8">${a}</div></div>`).join('')}</div>
+ <div class="rowb gap20"><div class="h2">Highlights</div></div><div class="clips gap14">${clips.map((c,i)=>`<button class="clipc" data-act="shot" data-id="${c.s.id}"><div class="thumb">${thumbSVG(i)}<span class="pb">${icon('play',16)}</span></div><div class="sm gap8"><b>${c.t}</b></div></button>`).join('')}</div>
+ <div class="h2 gap20">Session card</div><div class="sharecard gap14"><div class="rowb"><span class="lbl or">Courtside</span><span class="xs mu">Oct 13</span></div><div class="row gap14" style="align-items:flex-end"><div><div class="big or" style="font-size:84px">${s.m}</div><div class="lbl">Makes</div></div><div><div class="big" style="font-size:84px">${s.a}</div><div class="lbl">Attempts</div></div><div style="margin-left:auto;width:112px">${courtSVG({small:true,noZones:true})}</div></div><div class="rowb gap14"><b>${s.fg}% FG · 3PT ${gs('3')}%</b><span class="xs mu">${court().n.split(',')[0]}</span></div></div>
+ <button class="btn gh gap14" data-act="sheet" data-t="share">${icon('share',18)} Share session card</button>
+ <div class="h2 gap20">Recording setup</div><button class="card gap14 mrow" style="padding:14px 16px;border:1px solid var(--ln);width:100%" data-act="devsheet"><span style="color:var(--or)">${phoneSVG(30,alt.disc?'off':'on')}</span><span style="flex:1"><b style="display:block">${state.dev.name}</b><span class="xs mu">${dd} · ${batt()}%</span></span><span class="mu">${icon('chev')}</span></button></div>`;
+ return h}
+
+function community(){
+ const clips=clipOf(),cl=clips[state.hl];
+ let h=`<div class="pg"><div class="h1">Find a run</div><p class="lead">Share your best moments and line up your next game.</p>`;
+ if(state.hoop==='idle')h+=`<div class="card gap20" style="border-color:var(--or)"><div class="rowb"><span class="tag or">Open to hoop</span><div class="who" style="flex:none;gap:0"><span style="margin-right:-10px">${av(PPL[0],38,true)}</span>${av(PPL[3],38)}</div></div><div class="h2 gap14" style="font-size:28px;line-height:1.05">You and Bryant are both free Friday 2 to 3 PM. Run it?</div><div class="xs mu gap8">${court().n}${' '}${tagC(COURTS[0])}</div><div class="row gap14"><button class="btn pri" style="flex:2" data-act="down">I'm down</button><button class="btn gh" style="flex:1" data-act="notnow">Not now</button></div></div>`;
+ else h+=`<div class="note gap20">${icon('check')}<div><b>Snoozed</b>We will suggest another window soon. <button style="text-decoration:underline" data-act="undohoop">Undo</button></div></div>`;
+ h+=`<div class="rowb gap20"><div class="h2">Share a highlight</div></div><div class="card gap14"><div class="chips">${clips.map((c,i)=>`<button class="chip ${state.hl===i?'on':''}" data-act="hl" data-v="${i}">${c.t.split(',')[0]}</button>`).join('')}</div><div class="thumb gap14" style="width:100%;height:150px">${thumbSVG(state.hl).replace('width="158" height="104"','width="100%" height="150" preserveAspectRatio="xMidYMid slice"')}<span class="pb">${icon('play',16)}</span><span class="tm">${fmt(cl.s.sec)}</span></div><button class="btn gh gap14" data-act="sheet" data-t="share">${icon('share',18)} Share this highlight</button></div>`;
+ h+=`<div class="card" style="border:1.5px dashed var(--or)"><div class="rowb"><span class="tag or">Exploratory</span><span class="xs mu">Concept</span></div><div class="h2 gap14">Level up your game</div><div class="sm gap8">15 left-hand finishes</div><div class="tbar" style="height:7px;margin-top:10px"><i style="width:${state.chal?40:0}%"></i></div><div class="xs mu gap8">${state.chal?'6 of 15 done':'Picked because left-side finishing dropped late today.'}</div><button class="btn gh sm gap14" data-act="chal">${state.chal?'In progress':'Start challenge'}</button></div>`;
+ h+=`<div class="h2 gap20">Around you</div>`;
+ state.feed.slice().reverse().forEach(f=>{h+=`<div class="mrow">${av({i:f.w[0]},40)}<div style="flex:1"><b>${f.w}</b><div class="sm mu">${f.t}</div></div><span class="xs mu">${f.s}</span></div>`});
+ return h+'</div>'}
+
+const SCREENS={onboarding,plan,mount,players,identify,play,processing,recap,correct,profile,community};
+
+/* ---------- CTA ---------- */
+function cta(){
+ const sc=state.screen,s=state.step;
+ let c={l:'Continue',a:'next'};
+ if(sc==='onboarding'){c.l='Continue';c.sec={l:'Skip for now',a:'next'}}
+ if(sc==='plan')c.l='Confirm plan and head to the court';
+ if(sc==='mount'){const k=mountSteps()[s];
+  c.l={checkin:'Check in',place:'Phone is set',frame:'Looks good',calibrate:'Lines look right',ready:'Who is playing?'}[k];
+  if(k==='frame'&&alt.frame)c={l:'Adjust and re-check',a:'fixframe'}}
+ if(sc==='players')c.l='Identify yourself';
+ if(sc==='identify')c.l="Start session";
+ if(sc==='play'){c={l:'End session',a:'next'};if(alt.disc)c={l:'Resume recording',a:'reconnect',sec:{l:'End session anyway',a:'next'}}}
+ if(sc==='processing')c.l=state.proc.i>=4?'See my recap':'Skip the wait';
+ if(sc==='recap'){const n=mine().filter(x=>x.flag&&!x.res).length;c={l:n?`Check ${n} flagged shots`:'Review and confirm',a:'tocorrect'}}
+ if(sc==='correct')c={l:'Confirm',a:'confirm'};
+ if(sc==='profile')c.l='Back to recap';
+ if(sc==='community')c=state.hoop==='idle'?{l:"I'm down",a:'down'}:{l:'Plan a session',a:'next'};
+ return c}
+
+/* ---------- render ---------- */
+let lastKey='';
+function render(){
+ clearTimers();
+ const sc=state.screen;
+ const key=sc+':'+state.step;
+ const v=$('#view'),keep=v.scrollTop;
+ v.innerHTML=SCREENS[sc]();
+ const c=cta();
+ v.insertAdjacentHTML('beforeend',`<div class="cta"><button class="btn pri" data-act="${c.a}" ${c.dis?'disabled':''}>${c.l}</button>${c.sec?`<button class="lnk" data-act="${c.sec.a}">${c.sec.l}</button>`:''}</div>`);
+ const hasNav=sc!=='onboarding';
+ v.classList.toggle('hasnav',hasNav);
+ v.scrollTop=key===lastKey?keep:0;lastKey=key;
+ /* progress */
+ const ph=PHASE[sc];
+ $('#prog').innerHTML=PH.map((t,i)=>`<div class="${i<ph?'past':i===ph?'on':''}"><i></i>${t}</div>`).join('');
+ /* header */
+ const n=nsteps(),canBack=!(sc==='onboarding'&&state.step===0);
+ const chipOn=ORDER.indexOf(sc)>=1;
+ let chip='';
+ if(chipOn){
+  const st=alt.disc?'off':alt.low?'low':'';
+  const txt=alt.disc?'Paused':`Phone ${batt()}%`;
+  chip=`<button class="dchip ${st}" data-act="devsheet" aria-label="Recording setup: ${txt}"><span class="dd"></span>${alt.low&&!alt.disc?icon('batt',14)+' ':''}${txt}</button>`}
+ $('#hdr').innerHTML=`<button class="ib ${canBack?'':'ph'}" data-act="back" aria-label="Back">${icon('back',24)}</button><div class="hdt"><b>${HT[sc]}</b>${n>1?`<span>Step ${state.step+1} of ${n}</span>`:''}</div>${chip}`;
+ /* nav */
+ const NAVS=[['players','Players'],['identify','Identify'],['play','Play'],['recap','Recap'],['profile','Profile']];
+ $('#nav').style.display=hasNav?'flex':'none';
+ $('#nav').innerHTML=NAVS.map(([k,t])=>`<button class="${sc===k?'on':''}" data-act="nav" data-v="${k}">${icon(k,24)}${t}</button>`).join('');
+ $('#sbr').innerHTML=alt.offline?icon('wifioff',18):'<span style="font-size:12px;letter-spacing:.05em">5G</span>';
+ renderSheet();renderFlow();
+ hooks();
+}
+function hooks(){
+ const sc=state.screen,s=state.step;
+ if(sc==='mount'){const iv=setInterval(()=>{const e=$('#mtimer');if(!e||state.mt.end)return;e.textContent=fmt((Date.now()-state.mt.start)/1000)},1000);timers.push(iv)}
+ if(sc==='play'){const iv=setInterval(()=>{if(state.screen!=='play'||alt.disc)return;const p=state.play;if(p.i>=47)return;const sh=state.shots[p.i];p.i++;if(sh.made)p.m++;p.last=[...p.last,sh.made?'m':'x'].slice(-8);playDOM()},420);timers.push(iv)}
+ if(sc==='processing'&&state.proc.i<4){const iv=setTimeout(()=>{state.proc.i++;render()},1100);timers.push(iv)}
+}
+function playDOM(){const p=state.play,set=(i,t)=>{const e=$(i);if(e)e.textContent=t};set('#pm',p.m);set('#pa',p.i);set('#ppct',pct(p.m,p.i)+'% FG');set('#ptime',fmt(p.i*52.3)+' elapsed · '+(state.mode==='multi'?'Multi-player':'Solo'));
+ const l=$('#plast');if(l)l.innerHTML=p.last.map(x=>x==='m'?`<span title="Make" style="width:26px;height:26px;border-radius:50%;background:var(--or);display:inline-block"></span>`:`<span title="Miss" style="color:var(--ms);width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center">${icon('x',24,3)}</span>`).join('')}
+
+/* ---------- sheets ---------- */
+function renderSheet(){
+ const r=$('#sheetroot'),sh=state.sheet;
+ if(!sh){r.innerHTML='';return}
+ let b='';
+ if(sh.t==='clip'){const s=state.shots.find(x=>x.id===sh.id);b=`<div class="rowb"><span class="pill ${s.made?'make':'miss'}">${icon(s.made?'check':'x',14,3)} ${s.made?'Make':'Miss'}</span><span class="xs mu">${ZN[s.z]} · ${fmt(s.sec)}</span></div><div class="gap14">${clipScene(s)}</div>${s.flag&&!s.res?`<div class="note warn gap14">${icon('flag')}<div><b>Check this shot?</b>${s.flag}.</div></div>`:''}<button class="btn pri gap14" data-act="tocorrect1" data-id="${s.id}">Correct this shot</button><button class="btn gh gap8" data-act="sheet" data-t="share">${icon('share',18)} Share clip</button>`}
+ if(sh.t==='device'){const bl=batt(),dc=alt.disc;b=`<div class="h2" style="font-size:28px">Recording setup</div><div class="illus">${phoneSVG(84,dc?'off':'on')}<div class="h2 gap8">${state.dev.name}</div></div>
+  <div class="card gap14" style="padding:4px 16px"><div class="mrow"><span class="mu">${icon('target')}</span><span>Camera</span><b style="margin-left:auto">${dc?'Paused':'Ready'}</b></div><div class="mrow"><span class="mu">${icon('batt')}</span><span>Phone battery</span><b style="margin-left:auto">${bl}%${alt.low?' (low)':''}</b></div><div class="mrow"><span class="mu">${icon('sync')}</span><span>Upload</span><b style="margin-left:auto">${alt.offline?'When back online':'After the session'}</b></div></div>
+  ${alt.low?`<div class="note warn">${icon('alert')}<div>Battery is low. Plug in after this session or bring a battery pack.</div></div>`:''}
+  <div class="card gap14" style="border:1.5px dashed var(--ln2)"><div class="rowb"><b>Courtside hoop mount</b><span class="tag">Later</span></div><div class="xs mu gap8">Optional clip-on accessory for a steadier, fixed view. Not needed to use Courtside.</div></div>
+  ${dc?'<button class="btn pri gap14" data-act="reconnect">Resume recording</button>':''}<button class="btn gh gap8" data-act="closesheet">Done</button>`}
+ if(sh.t==='share'){b=`<div class="h2" style="font-size:28px">Share</div><div class="chips gap14">${['Community feed','Story','Messages','Copy link'].map(x=>`<button class="chip" data-act="shareto" data-v="${x}">${x}</button>`).join('')}</div><button class="btn gh gap20" data-act="closesheet">Cancel</button>`}
+ r.innerHTML=`<div class="sheetbg" data-act="closesheet"></div><div class="sheet" role="dialog"><div class="grab"></div>${b}</div>`}
+
+/* ---------- flow menu ---------- */
+function renderFlow(){
+ const f=$('#flow');
+ const alts=[['frame','Phone not level or hoop not in frame'],['disc','Recording interrupted mid-session'],['low','Low phone battery'],['partial','Tracking failure (partial session)'],['offline','Offline court']];
+ f.innerHTML=`<h2>Courtside</h2><div class="sub">Clickable prototype. Phone-first: no extra hardware needed. Tap the orange button on each screen to walk the journey.</div>
+ <div class="fl-h">Jump to screen</div><div class="lst">${ORDER.map((k,i)=>`<button class="fl-btn ${state.screen===k?'on':''}" data-act="jump" data-v="${i}"><b>${i+1}</b>${MENU[k]}</button>`).join('')}</div>
+ <button class="fl-btn restart" data-act="restart">Restart journey</button>
+ <div class="fl-h">Alternate states</div>${alts.map(([k,t])=>`<button class="alt ${alt[k]?'on':''}" data-act="alt" data-v="${k}" aria-pressed="${alt[k]}"><span class="sw"></span>${t}</button>`).join('')}`}
+
+/* ---------- navigation ---------- */
+function go(sc,o={}){
+ clearTimers();
+ if(o.push!==false&&sc!==state.screen)state.hist.push(state.screen);
+ state.screen=sc;state.step=o.last?nsteps(sc)-1:(o.step||0);state.sheet=null;
+ if(sc==='mount'&&!o.last&&!o.keepMt){state.mt={start:null,end:null}}
+ render();
+}
+function back(){
+ if(state.step>0){state.step--;state.sheet=null;clearTimers();return render()}
+ const prev=state.hist.pop();
+ if(prev)go(prev,{push:false,last:true});
+}
+function jump(i,fromMenu){
+ const sc=ORDER[i];state.hist=ORDER.slice(0,i);
+  if(sc==='plan'&&state.hoop==='down'){}
+ if(sc==='play'){state.play={i:0,m:0,last:[]}}
+ if(sc==='processing')state.proc.i=0;
+ if(sc==='recap'||sc==='profile')state.corr=[];
+ go(sc,{push:false});
+}
+function next(){
+ const sc=state.screen;
+ if(sc==='mount'&&mountSteps()[state.step]==='ready'&&!state.mt.end)state.mt.end=Date.now();
+ if(sc==='play'){state.proc.i=0;}
+ if(state.step<nsteps()-1){state.step++;clearTimers();return render()}
+ if(sc==='plan')return go('mount');
+ const i=ORDER.indexOf(sc);
+ if(sc==='profile')return go('recap');
+ if(sc==='play'){state.proc.i=0}
+ go(ORDER[i+1]);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+ const a=e.target.closest('[data-act]');if(!a)return;
+ const act=a.dataset.act,v=a.dataset.v,d=a.dataset;
+ switch(act){
+  case 'next':return next();
+  case 'back':return back();
+  case 'nav':{const i=ORDER.indexOf(v);return jump(i)}
+  case 'jump':return jump(+v,true);
+  case 'restart':{clearTimers();const keep={...alt};Object.assign(state,fresh());Object.assign(alt,keep);lastKey='';render();return}
+  case 'alt':alt[v]=!alt[v];if(v==='frame'&&alt.frame&&state.screen!=='mount'){}return render();
+  case 'ob':{const val=v==='true'?true:v==='false'?false:v;state.ob[d.k]=val;return render()}
+  case 'pcourt':state.plan.court=v;state.mountView=null;return render();
+  case 'pday':state.plan.day=v;return render();
+  case 'ptime':state.plan.time=v;return render();
+  case 'pinv':state.plan.inv[v]=!state.plan.inv[v];return render();
+  case 'mview':state.mountView=v;state.step=0;state.mt={start:null,end:null};return render();
+  case 'gymok':state.gymOk=!state.gymOk;return render();
+  case 'reconnect':alt.disc=false;state.sheet=null;toast('Recording resumed');return render();
+  case 'fixframe':alt.frame=false;toast('Level. Rim in frame.');return render();
+  case 'me':state.me=+d.i;return render();
+  case 'pmode':state.mode=v;return render();
+  case 'pteam':state.team[v]=!state.team[v];return render();
+  case 'cmode':state.cmode=v;return render();
+  case 'zone':state.zsel=state.zsel===d.z?null:d.z;return render();
+  case 'shot':state.sheet={t:'clip',id:d.id};return renderSheet();
+  case 'sheet':state.sheet={t:v==='share'?'share':v};return renderSheet();
+  case 'devsheet':state.sheet={t:'device'};return renderSheet();
+  case 'closesheet':state.sheet=null;return renderSheet();
+  case 'shareto':{const w=v;state.sheet=null;if(w==='Community feed'){state.feed.push({w:'You',t:state.screen==='community'?clipOf()[state.hl].t:'Session card: '+stats().m+'/'+stats().a+', '+stats().fg+'% FG',s:'Just now'})}toast(w==='Copy link'?'Link copied':'Shared to '+w);return render()}
+  case 'tocorrect':{state.corr=mine().filter(x=>x.flag&&!x.res).map(x=>x.id);state.draft={};return go('correct')}
+  case 'tocorrect1':{state.corr=[d.id];state.draft={};state.sheet=null;return go('correct')}
+  case 'cmade':state.draft[d.id].made=v==='1';return render();
+  case 'cwho':state.draft[d.id].p=v;return render();
+  case 'confirm':{Object.keys(state.draft).forEach(id=>{const s=state.shots.find(x=>x.id===id),dr=state.draft[id];s.made=dr.made;s.p=dr.p;s.res=true});state.corr=[];state.draft={};state.justConfirmed=true;toast('Session confirmed. Stats updated.');return go('profile')}
+  case 'trend':state.trend=v;return render();
+  case 'down':{state.hoop='down';state.plan.day='fri';state.plan.time='2pm';state.plan.court='fg';state.plan.inv.bryant=true;state.mountView=null;state.justConfirmed=false;toast('Locked in. Opening Plan with Friday 2 PM.');return go('plan')}
+  case 'notnow':state.hoop='snoozed';return render();
+  case 'undohoop':state.hoop='idle';return render();
+  case 'hl':state.hl=+v;return render();
+  case 'chal':state.chal=!state.chal;return render();
+ }
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.dot')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+
+function fit(){const w=innerWidth,h=innerHeight,narrow=w<=880;let sc=narrow?Math.min(1,(w-60)/390):Math.min(1,(h-70)/844,(w-270-36-70)/390);sc=Math.max(.45,sc);document.documentElement.style.setProperty('--sc',sc)}
+addEventListener('resize',fit);fit();
+render();
+</script>
+</body>
+</html>
